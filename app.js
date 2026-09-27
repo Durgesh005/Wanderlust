@@ -82,7 +82,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// ROOT ROUTE: Must be placed BEFORE listingRouter, reviewRouter, and userRouter
+// ROOT ROUTE: Direct controller execution avoids session redirect loops
 app.get("/", (req, res) => {
     res.redirect("/listings");
 });
