@@ -82,7 +82,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// Root route redirecting to /listings
+// Root route - Must be defined BEFORE userRouter
 app.get("/", (req, res) => {
     res.redirect("/listings");
 });
