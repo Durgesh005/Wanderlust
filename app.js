@@ -41,13 +41,18 @@ app.use(methodOverride("_method"));
 app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
 
-const store = MongoStore.create({
+// MongoStore initialization compatible with all connect-mongo versions
+const store = (MongoStore.create ? MongoStore.create({
     mongoUrl: dbUrl,
     crypto: {
         secret: process.env.SECRET || "mysupersecretcode",
     },
     touchAfter: 24 * 3600,
-});
+}) : new (require("connect-mongo")(session))({
+    url: dbUrl,
+    secret: process.env.SECRET || "mysupersecretcode",
+    touchAfter: 24 * 3600,
+}));
 
 store.on("error", (err) => {
     console.log("ERROR in MONGO SESSION STORE", err);
@@ -82,7 +87,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// ROOT ROUTE: Standard redirect to /listings
+// ROOT ROUTE: Redirect to listings
 app.get("/", (req, res) => {
     res.redirect("/listings");
 });
