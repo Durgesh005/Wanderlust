@@ -41,18 +41,27 @@ app.use(methodOverride("_method"));
 app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
 
-// MongoStore initialization compatible with all connect-mongo versions
-const store = (MongoStore.create ? MongoStore.create({
-    mongoUrl: dbUrl,
-    crypto: {
-        secret: process.env.SECRET || "mysupersecretcode",
-    },
-    touchAfter: 24 * 3600,
-}) : new (require("connect-mongo")(session))({
-    url: dbUrl,
-    secret: process.env.SECRET || "mysupersecretcode",
-    touchAfter: 24 * 3600,
-}));
+// Universal MongoStore initialization
+const store = MongoStore.create
+    ? MongoStore.create({
+          mongoUrl: dbUrl,
+          crypto: {
+              secret: process.env.SECRET || "mysupersecretcode",
+          },
+          touchAfter: 24 * 3600,
+      })
+    : MongoStore.default && MongoStore.default.create
+    ? MongoStore.default.create({
+          mongoUrl: dbUrl,
+          crypto: {
+              secret: process.env.SECRET || "mysupersecretcode",
+          },
+          touchAfter: 24 * 3600,
+      })
+    : new MongoStore({
+          mongoUrl: dbUrl,
+          touchAfter: 24 * 3600,
+      });
 
 store.on("error", (err) => {
     console.log("ERROR in MONGO SESSION STORE", err);
@@ -96,8 +105,8 @@ app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
 app.use("/", userRouter);
 
-// 404 CATCH-ALL ROUTE
-app.all("*", (req, res, next) => {
+// 404 CATCH-ALL ROUTE (Express 5 wildcard fix)
+app.all("/*splat", (req, res, next) => {
     next(new ExpressError(404, "Page Not Found!"));
 });
 
