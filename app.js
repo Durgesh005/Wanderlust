@@ -16,6 +16,8 @@ const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/user.js");
 
+// Controllers & Routes
+const listingController = require("./controllers/listings.js");
 const listingRouter = require("./routes/listing.js");
 const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
@@ -82,10 +84,8 @@ app.use((req, res, next) => {
     next();
 });
 
-// ROOT ROUTE: Direct controller execution avoids session redirect loops
-app.get("/", (req, res) => {
-    res.redirect("/listings");
-});
+// ROOT ROUTE: Render listings directly at root path without a redirect
+app.get("/", listingController.index);
 
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
