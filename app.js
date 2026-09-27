@@ -15,9 +15,8 @@ const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/user.js");
+const Listing = require("./models/listing.js");
 
-// Controllers & Routes
-const listingController = require("./controllers/listings.js");
 const listingRouter = require("./routes/listing.js");
 const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
@@ -84,8 +83,15 @@ app.use((req, res, next) => {
     next();
 });
 
-// ROOT ROUTE: Render listings directly at root path without a redirect
-app.get("/", listingController.index);
+// Direct Root Route - Fetches and renders listings directly at '/'
+app.get("/", async (req, res, next) => {
+    try {
+        const allListings = await Listing.find({});
+        res.render("listings/index.ejs", { allListings });
+    } catch (err) {
+        next(err);
+    }
+});
 
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
