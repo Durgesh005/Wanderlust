@@ -82,7 +82,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// Root route - Must be defined BEFORE userRouter
+// ROOT ROUTE: Must be placed BEFORE listingRouter, reviewRouter, and userRouter
 app.get("/", (req, res) => {
     res.redirect("/listings");
 });
@@ -91,10 +91,12 @@ app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
 app.use("/", userRouter);
 
+// 404 CATCH-ALL ROUTE
 app.all("*", (req, res, next) => {
     next(new ExpressError(404, "Page Not Found!"));
 });
 
+// ERROR HANDLING MIDDLEWARE
 app.use((err, req, res, next) => {
     let { statusCode = 500, message = "Something went wrong!" } = err;
     res.status(statusCode).render("error.ejs", { message });
